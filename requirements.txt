@@ -1,0 +1,7 @@
+flask
+flask-session
+requests
+beautifulsoup4
+pandas
+weasyprint
+certifi

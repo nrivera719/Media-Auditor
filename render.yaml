@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: media-auditor
+    env: python
+    buildCommand: ""
+    startCommand: "gunicorn app:app"
+    plan: free
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        value: securekey
