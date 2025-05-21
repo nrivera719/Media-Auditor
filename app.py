@@ -8,6 +8,7 @@ import pandas as pd
 from weasyprint import HTML
 import certifi
 import logging
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'securekey'
@@ -140,6 +141,7 @@ def crawl_website(start_url):
         for link in links:
             if urlparse(link).netloc == urlparse(start_url).netloc and link not in visited_urls:
                 queue.append(link)
+        time.sleep(1)  # ← this slows it down just enough to prevent crashing
     return media_data
 
 if __name__ == '__main__':
