@@ -109,23 +109,40 @@ def is_valid_url(url):
         logger.error(f"URL validation failed: {e}")
         return False
 
+import time  # make sure this is at the top
+
 def extract_media(url, base, media_data):
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers, timeout=10, verify=certifi.where())
-        if response.status_code != 200:
+
+        if response.status_code != 200 or not response.content:
             return []
-        soup = BeautifulSoup(response.content, 'html.parser')
+
+        try:
+            soup = BeautifulSoup(response.content, 'html.parser')
+        except Exception as e:
+            print(f"[!] Failed to parse HTML for {url}: {e}")
+            return []
+
         media_tags = [('img', 'src', 'image'), ('video', 'src', 'video'), ('audio', 'src', 'audio'), ('source', 'src', 'media')]
         for tag, attr, media_type in media_tags:
             for element in soup.find_all(tag):
                 src = element.get(attr)
                 if src:
                     full_url = urljoin(base, src)
-                    media_data.append({'media_url': full_url, 'type': media_type, 'page_url': url})
-        return [urljoin(base, a.get('href')) for a in soup.find_all('a', href=True)]
+                    media_data.append({
+                        'media_url': full_url,
+                        'type': media_type,
+                        'page_url': url
+                    })
+
+        links = [urljoin(base, a.get('href')) for a in soup.find_all('a', href=True)]
+        time.sleep(1)  # 👈 throttle crawling to reduce memory spikes
+        return links
+
     except Exception as e:
-        logger.error(f"Error extracting from {url}: {e}")
+        print(f"[!] Error extracting from {url}: {e}")
         return []
 
 def crawl_website(start_url):
